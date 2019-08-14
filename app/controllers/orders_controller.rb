@@ -2,7 +2,9 @@ require 'httparty'
 require 'json'
 
 class OrdersController < ApplicationController
-  include Httparty
+  include HTTParty
+  format :json
+  
   # POST /orders
   # POST /orders.json
   def create
@@ -10,42 +12,50 @@ class OrdersController < ApplicationController
     itemId = order_params[:itemId]
     customerId = order_params[:customerId]
     
-    base_uri 'http://localhost:8082'
+    logger.debug "getting item"
+    self.class.base_uri "http://localhost:8082"
     uri = "/items/%d" % [itemId]
-    response = get uri
+    response = self.class.get uri
     
     #Check if item of this id was fetched correctly
     if response.code == 200
-      @item = response.body
+      item = response.body
     else
       fail = true
     end
-    
-    base_uri 'http://localhost:8081'
+    logger.debug item
+
+    logger.debug "getting customer"
+    self.class.base_uri "http://localhost:8081"
     uri = "/customers?id=%d" % [customerId]
-    response = get uri
+    response = self.class.get uri
     
+
     #Check if customer of this id was fetched correctly
     if response.code == 200
-      @customer = response.body
+      customer = response.body
     else
       fail = true
     end
-    
+    logger.debug customer
+        
     #If item and customer are found, create the order, otherwise, give a 404 not found error
-    if !fail 
-      description = @item[:description]
-      price = @item[:price]
-      @customer.award = '%.2f' % (0.10 * (@customer.lastOrder + @customer.lastOrder2 + @customer.lastOrder3)/3)
-      award = @customer[:award]
-      total = price - award
+    if !fail
+      logger.debug "success"
+      #asdf = 
+      #price = @item.[:price]
+      #@customer.award = '%.2f' % (0.10 * (@customer.lastOrder + @customer.lastOrder2 + @customer.lastOrder3)/3)
+      #award = @customer[:award]
+      #total = price - award
   
-      @order = Order.new({itemId: itemId, customerId: customerId, description: description, price: price, award: award, total: total})
-      if @order.save
-        render json: @order, status: 201
-      else
-        render json: @order.errors.messages, status: 400
-      end
+      #@order = Order.new({itemId: itemId, customerId: customerId, description: description, price: price, award: award, total: total})
+      #if @order.save
+      #  render json: @order, status: 201
+      #  
+      #  #raise ActiveRecord::Rollback, "Rolling back changes"
+      #else
+      #  render json: @order.errors.messages, status: 400
+      #end
     else
       head 404
     end

@@ -20,6 +20,15 @@ class OrderClient
 
   def OrderClient.addOrder(itemId, customerId)
     base_uri 'http://localhost:8080'
+    response = post '/orders',
+        body: {order:{itemId: itemId, customerId: customerId}}.to_json,
+        headers: {'Content-Type' => 'application/json',
+        'ACCEPT' => 'application/json' }
+        
+        puts response.code
+        if response.code == 201
+          puts response.body
+        end
   end
   
   def OrderClient.addCustomer(lastName, firstName, email)
@@ -115,10 +124,10 @@ while exit == false do
       
       puts "Input item id"
       itemId = gets.chomp
-      puts "Input customer od"
+      puts "Input customer id"
       customerId = gets.chomp
       puts "Attempting to place order..."
-      OrderClient.addEntry(itemId, customerId)
+      OrderClient.addOrder(itemId, customerId)
 
       
     when "additem"
