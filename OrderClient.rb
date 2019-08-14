@@ -4,44 +4,33 @@ require 'json'
 class OrderClient
 
   include HTTParty
-
-
-  
   format :json
-  
-=begin
-  #◦ create a new order
-  ◦ retrieve an existing order by orderId, customerId, or customer email
-  #◦ register a new customer
-  ◦ lookup a customer by id or by email
-  #◦ create a new item
-  ◦ lookup an item by item id
-=end
+
 
   def OrderClient.addOrder(itemId, customerId)
     base_uri 'http://localhost:8080'
     response = post '/orders',
-        body: {order:{itemId: itemId, customerId: customerId}}.to_json,
-        headers: {'Content-Type' => 'application/json',
-        'ACCEPT' => 'application/json' }
-        
-        puts response.code
-        if response.code == 201
-          puts response.body
-        end
+      body: {order:{itemId: itemId, customerId: customerId}}.to_json,
+      headers: {'Content-Type' => 'application/json',
+      'ACCEPT' => 'application/json' }
+      
+    puts response.code
+    if response.code == 201
+      puts response.body
+    end
   end
   
   def OrderClient.addCustomer(lastName, firstName, email)
     base_uri 'http://localhost:8081'
     response = post '/customers',
-        body: {customer:{lastName:  lastName, firstName:  firstName, email:  email}}.to_json,
-        headers: {'Content-Type' => 'application/json',
-        'ACCEPT' => 'application/json' }
+      body: {customer:{lastName:  lastName, firstName:  firstName, email:  email}}.to_json,
+      headers: {'Content-Type' => 'application/json',
+      'ACCEPT' => 'application/json' }
         
-        puts response.code
-        if response.code == 201
-          puts response.body
-        end
+    puts response.code
+    if response.code == 201
+      puts response.body
+    end
   end
 
   def OrderClient.addItem(description, price, stock)
@@ -51,19 +40,19 @@ class OrderClient
         headers: { 'Content-Type' => 'application/json',
         'ACCEPT' => 'application/json' }
     
-        puts response.code
-        puts response.body
+    puts response.code
+    puts response.body
   end
   
   def OrderClient.findCustomerByEmail(email)
     base_uri 'http://localhost:8081'
-      uri = "/customers?email=%s" % [email]
-      response = get uri
-        
-        puts response.code
-        if response.code == 200
-          puts response.body
-        end
+    uri = "/customers?email=%s" % [email]
+    response = get uri
+    
+    puts response.code
+    if response.code == 200
+      puts response.body
+    end
   end
   
   def OrderClient.findCustomerById(id)
@@ -71,42 +60,55 @@ class OrderClient
     uri = "/customers?id=%s" % [id]
     response = get uri
       
-      puts response.code
-      if response.code == 200
-        puts response.body
-      end
+    puts response.code
+    if response.code == 200
+      puts response.body
+    end
   end
   
   def OrderClient.findItemById(id)
     base_uri 'http://localhost:8082'
     
-      uri = "/items/%d" % [id]
-      response = get uri
-        
-        puts response.code
-        if response.code == 200
-          puts response.body
-        end
+    uri = "/items/%d" % [id]
+    response = get uri
+      
+    puts response.code
+    if response.code == 200
+      puts response.body
+    end
   end
   
   def OrderClient.findOrderById(id)
     base_uri 'http://localhost:8080'
-    
-      uri = "/orders/%d" % [id]
-      response = get uri
-        
-        puts response.code
-        if response.code == 200
-          puts response.body
-        end
+    uri = "/orders/%d" % [id]
+    response = get uri
+      
+    puts response.code
+    if response.code == 200
+      puts response.body
+    end
   end
   
   def OrderClient.findOrderByEmail(email)
     base_uri 'http://localhost:8080'
+    uri = "/orders?email=%s" % [email]
+    response = get uri
+      
+    puts response.code
+    if response.code == 200
+      puts response.body
+    end
   end
   
   def OrderClient.findOrderByCustomerId(customerId)
     base_uri 'http://localhost:8080'
+    uri = "/orders?customerId=%d" % [customerId]
+    response = get uri
+      
+    puts response.code
+    if response.code == 200
+      puts response.body
+    end
   end
   
 end
@@ -157,13 +159,19 @@ while exit == false do
         option2 = gets.chomp
         case option2
           when "orderId"
-            #todo: search for order by id
+            puts "Input order id"
+            id = gets.chomp
+            OrderClient.findOrderById(id)
             invalid = false
           when "email"
-            #todo: search for orders by email
+            puts "Input customer email"
+            email = gets.chomp
+            OrderClient.findOrderByEmail(email)
             invalid = false
           when "customerId"
-            #todo: search for orders by customerid
+            puts "Input customer id"
+            id = gets.chomp
+            OrderClient.findOrderByCustomerId(id)
             invalid = false
           else
             puts "Unrecognized option"
