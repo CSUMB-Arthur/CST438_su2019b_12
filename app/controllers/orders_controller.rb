@@ -49,8 +49,7 @@ class OrdersController < ApplicationController
       logger.debug price
       customer = JSON.parse(customer)
       
-      #maybe modify customer server to retrieve customer award calculations, instead of recalculating using a formula that might not sync with the other server
-      award = (0.10 * (customer["lastOrder"] + customer["lastOrder2"] + customer["lastOrder3"])/3)
+      award = customer["award"]
       total = price - award
   
       @order = Order.new({itemId: itemId, customerId: customerId, description: description, price: price, award: award, total: total})
@@ -73,7 +72,7 @@ class OrdersController < ApplicationController
     @order = Order.find(params[:id]) rescue nil
 
     #success
-    if @item
+    if @order
       render json: @order , status: 200
     #failure
     else
@@ -86,11 +85,17 @@ class OrdersController < ApplicationController
     #customer id to search for, if given, otherwise determine the id from email.
     targetId = params[:customerId]
     if targetId == nil
-      @customer = Customer.find_by(email: params[:email])
-      targetId = @customer[:id]
+      self.class.base_uri "http://localhost:8081"
+      uri = "/customers?email=%s" % [params[:email]]
+      response = self.class.get uri
+      
+      
+      targetId = JSON.parse(response.body)["id"]
+      logger.debug "by email"
+      logger.debug targetId
     end
-
-    @orders = Order.find_by(customerId: targetId)
+    @orders = Order.where(["customerId = :i", { i: targetId }]).take(10)
+    #@orders = Order.find_by(customerId: targetId)
     
    if @orders
      #success
