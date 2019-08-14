@@ -12,7 +12,7 @@ class OrdersController < ApplicationController
     itemId = order_params[:itemId]
     customerId = order_params[:customerId]
     
-    logger.debug "getting item"
+    #logger.debug "getting item"
     self.class.base_uri "http://localhost:8082"
     uri = "/items/%d" % [itemId]
     response = self.class.get uri
@@ -23,9 +23,9 @@ class OrdersController < ApplicationController
     else
       fail = true
     end
-    logger.debug item
+    #logger.debug item
 
-    logger.debug "getting customer"
+    #logger.debug "getting customer"
     self.class.base_uri "http://localhost:8081"
     uri = "/customers?id=%d" % [customerId]
     response = self.class.get uri
@@ -37,25 +37,30 @@ class OrdersController < ApplicationController
     else
       fail = true
     end
-    logger.debug customer
+    #logger.debug customer
         
     #If item and customer are found, create the order, otherwise, give a 404 not found error
     if !fail
-      logger.debug "success"
-      #asdf = 
-      #price = @item.[:price]
-      #@customer.award = '%.2f' % (0.10 * (@customer.lastOrder + @customer.lastOrder2 + @customer.lastOrder3)/3)
-      #award = @customer[:award]
-      #total = price - award
+      #logger.debug "success"
+      item = JSON.parse(item)
+      description = item["description"]
+      
+      price = item["price"].to_f #to float, as it's parsed as a string for some reason
+      logger.debug price
+      customer = JSON.parse(customer)
+      
+      #maybe modify customer server to retrieve customer award calculations, instead of recalculating using a formula that might not sync with the other server
+      award = (0.10 * (customer["lastOrder"] + customer["lastOrder2"] + customer["lastOrder3"])/3)
+      total = price - award
   
-      #@order = Order.new({itemId: itemId, customerId: customerId, description: description, price: price, award: award, total: total})
-      #if @order.save
-      #  render json: @order, status: 201
-      #  
+      @order = Order.new({itemId: itemId, customerId: customerId, description: description, price: price, award: award, total: total})
+      if @order.save
+        render json: @order, status: 201
+        
       #  #raise ActiveRecord::Rollback, "Rolling back changes"
-      #else
-      #  render json: @order.errors.messages, status: 400
-      #end
+      else
+        render json: @order.errors.messages, status: 400
+      end
     else
       head 404
     end
